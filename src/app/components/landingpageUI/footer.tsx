@@ -130,7 +130,10 @@ export default function Footer() {
             </div>
           </div>
           <div className="mt-12 border-t pt-8 text-center text-sm text-gray-500">
-            <p>© {new Date().getFullYear()} Supply Matrix AI. All rights reserved.</p>
+          <p>
+            © {new Date().getFullYear()} Powered by 
+            <a href="https://www.craftora.tech/" target="_blank"> Craftora</a>.
+          </p>
           </div>
         </div>
       </footer>

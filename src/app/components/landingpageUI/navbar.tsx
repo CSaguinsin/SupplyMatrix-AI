@@ -1,12 +1,55 @@
 "use client"
-import { Globe, Menu, X } from "lucide-react"
+
+import { Globe, Menu, User, X } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from 'next/navigation'
+import { createClient } from "@/utils/supabase/client"
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-
+  const [user, setUser] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const router = useRouter()
+  
+  useEffect(() => {
+    const supabase = createClient()
+    
+    // Check current auth state
+    const checkUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        setUser(user)
+      } catch (error) {
+        console.error("Error fetching user:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    checkUser()
+    
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user || null)
+      }
+    )
+    
+    // Cleanup subscription on unmount
+    return () => {
+      subscription?.unsubscribe()
+    }
+  }, [])
+  
+  const handleSignOut = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/')
+    router.refresh()
+  }
+  
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/90 backdrop-blur-lg supports-[backdrop-filter]:bg-white/80">
@@ -58,20 +101,40 @@ export default function Navbar() {
 
             {/* Auth Buttons - Desktop */}
             <div className="hidden md:flex items-center gap-3">
-              <Link 
-                href="/login" 
-                className="text-sm font-medium text-gray-700 hover:text-teal-600 px-3 py-2 transition-colors"
-              >
-                Sign in
-              </Link>
-              <Button 
-                asChild
-                className="bg-teal-600 hover:bg-teal-700 px-4 shadow-md hover:shadow-teal-200/50 transition-all"
-              >
-                <Link href="/signup">
-                  Start free trial
-                </Link>
-              </Button>
+              {user ? (
+                <>
+                  <Button 
+                    asChild
+                    variant="ghost" 
+                    className="rounded-full text-gray-700 hover:text-teal-600 px-3 py-2 transition-colors"
+                  >
+                    <Link href="/dashboard">
+                      <User className="h-4 w-4 mr-2" />
+                      Dashboard
+                    </Link>
+                  </Button>
+                  <Button 
+                    onClick={handleSignOut}
+                    className="bg-teal-600 hover:bg-teal-700 px-4 shadow-md hover:shadow-teal-200/50 transition-all"
+                  >
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button onClick={() => router.push('/auth/login')} variant="ghost" className="rounded-full text-gray-700 hover:text-teal-600 px-3 py-2 transition-colors">
+                    Sign in
+                  </Button>
+                  <Button 
+                    asChild
+                    className="bg-teal-600 hover:bg-teal-700 px-4 shadow-md hover:shadow-teal-200/50 transition-all"
+                  >
+                    <Link href="/auth/signup">
+                      Start free trial
+                    </Link>
+                  </Button>
+                </>
+              )}
             </div>
 
             {/* Mobile menu button */}
@@ -138,26 +201,50 @@ export default function Navbar() {
               >
                 Pricing
               </Link>
-            </div>
-            <div className="mt-auto px-4 pb-8 pt-6 space-y-4">
-              <Button 
-                asChild
-                className="w-full bg-teal-600 hover:bg-teal-700 shadow-md hover:shadow-teal-200/50"
-              >
-                <Link href="/signup" onClick={() => setMobileMenuOpen(false)}>
-                  Start free trial
-                </Link>
-              </Button>
-              <p className="text-center text-sm text-gray-600">
-                Already have an account?{' '}
+              
+              {user && (
                 <Link 
-                  href="/login" 
-                  className="font-medium text-teal-600 hover:text-teal-700"
+                  href="/dashboard" 
+                  className="block text-base font-medium text-teal-600 hover:text-teal-700 py-2 border-b border-gray-100"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Sign in
+                  Dashboard
                 </Link>
-              </p>
+              )}
+            </div>
+            <div className="mt-auto px-4 pb-8 pt-6 space-y-4">
+              {user ? (
+                <Button 
+                  onClick={() => {
+                    handleSignOut();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full bg-teal-600 hover:bg-teal-700 shadow-md hover:shadow-teal-200/50"
+                >
+                  Sign Out
+                </Button>
+              ) : (
+                <>
+                  <Button 
+                    asChild
+                    className="w-full bg-teal-600 hover:bg-teal-700 shadow-md hover:shadow-teal-200/50"
+                  >
+                    <Link href="/auth/signup" onClick={() => setMobileMenuOpen(false)}>
+                      Start free trial
+                    </Link>
+                  </Button>
+                  <p className="text-center text-sm text-gray-600">
+                    Already have an account?{' '}
+                    <Link 
+                      href="/auth/login" 
+                      className="font-medium text-teal-600 hover:text-teal-700"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Sign in
+                    </Link>
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>
