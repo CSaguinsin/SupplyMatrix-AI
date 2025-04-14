@@ -60,7 +60,8 @@ export default function Signup() {
                 full_name: `${formData.firstName} ${formData.lastName}`
             }
 
-            const { error } = await supabase.auth.signUp({
+            // Step 1: Sign up the user
+            const { data: authData, error: signUpError } = await supabase.auth.signUp({
                 email: formData.email,
                 password: formData.password,
                 options: {
@@ -69,9 +70,29 @@ export default function Signup() {
                 }
             })
 
-            if (error) {
-                setError(error.message)
+            if (signUpError) {
+                setError(signUpError.message)
                 return
+            }
+
+            // Step 2: If signup successful and we have a user ID, update the profile in public.users table
+            if (authData.user) {
+                // Update the user's profile in the public.users table
+                const { error: profileError } = await supabase
+                    .from('users')
+                    .upsert({
+                        id: authData.user.id,
+                        first_name: formData.firstName,
+                        last_name: formData.lastName,
+                        company: formData.company,
+                        email: formData.email
+                    })
+
+                if (profileError) {
+                    console.error("Error updating user profile:", profileError)
+                    // We don't set an error here because the auth signup was successful
+                    // The profile data will be created by our database trigger as a fallback
+                }
             }
 
             // Show success message

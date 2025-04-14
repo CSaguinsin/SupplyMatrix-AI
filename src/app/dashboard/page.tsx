@@ -13,6 +13,13 @@ export default async function Dashboard() {
     redirect('/auth/login')
   }
   
+  // Fetch the user's profile data from the users table
+  const { data: profile } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', user.id)
+    .single()
+  
   return (
     <div className="flex min-h-screen flex-col p-8">
       <div className="mb-8 flex items-center justify-between">
@@ -41,6 +48,20 @@ export default async function Dashboard() {
             <p className="text-sm font-medium text-gray-500">Email</p>
             <p className="text-lg">{user.email}</p>
           </div>
+          
+          {profile && (
+            <>
+              <div>
+                <p className="text-sm font-medium text-gray-500">Name</p>
+                <p className="text-lg">{profile.first_name} {profile.last_name}</p>
+              </div>
+              
+              <div>
+                <p className="text-sm font-medium text-gray-500">Company</p>
+                <p className="text-lg">{profile.company || 'Not specified'}</p>
+              </div>
+            </>
+          )}
           
           <div>
             <p className="text-sm font-medium text-gray-500">User ID</p>

@@ -278,6 +278,96 @@ export const config = {
 
 This architecture ensures secure, server-side authentication while providing a seamless user experience.
 
+## 📚 Database Design
+
+### User Profiles System
+
+SupplyMatrix AI implements a comprehensive user profile system that extends Supabase's built-in authentication:
+
+#### Database Schema
+
+```sql
+-- Users table structure
+CREATE TABLE public.users (
+  id UUID REFERENCES auth.users(id) NOT NULL PRIMARY KEY,
+  first_name TEXT,
+  last_name TEXT,
+  full_name TEXT GENERATED ALWAYS AS (first_name || ' ' || last_name) STORED,
+  company TEXT,
+  email TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL
+);
+```
+
+#### Security Implementation
+
+The user profiles system employs Row Level Security (RLS) to ensure data privacy:
+
+```sql
+-- Enable Row Level Security
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+
+-- Policy: Users can view their own data
+CREATE POLICY "Users can view own profile" 
+  ON public.users 
+  FOR SELECT 
+  USING (auth.uid() = id);
+
+-- Policy: Users can update their own data
+CREATE POLICY "Users can update own profile" 
+  ON public.users 
+  FOR UPDATE 
+  USING (auth.uid() = id);
+
+-- Policy: New users can insert their own data
+CREATE POLICY "Users can insert own profile" 
+  ON public.users 
+  FOR INSERT 
+  WITH CHECK (auth.uid() = id);
+```
+
+#### Automated Profile Creation
+
+Every time a new user signs up, a profile is automatically created through a database trigger:
+
+```sql
+-- Function to create user profile on signup
+CREATE OR REPLACE FUNCTION public.handle_new_user() 
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.users (id, first_name, last_name, company, email)
+  VALUES (new.id, '', '', '', new.email);
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger the function on user creation
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+```
+
+#### How It Works
+
+1. **User Registration Flow**:
+   - When users sign up, their auth credentials go to Supabase's `auth.users` table
+   - The signup form collects additional profile information (name, company)
+   - This data is stored in our custom `public.users` table
+   - The tables are linked via the user's UUID
+
+2. **Security Model**:
+   - Row Level Security ensures users can only access their own profile data
+   - Each user has a completely isolated view of the database
+   - Even on the client side, users cannot access others' information
+
+3. **Data Access Pattern**:
+   - Client-side: Access limited by RLS policies
+   - Server-side: Can bypass RLS when necessary for admin functions
+   - Profile updates: Handled through secure API endpoints
+
+This dual-table approach allows for flexible user profiles while maintaining Supabase's secure authentication system.
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
