@@ -77,21 +77,36 @@ export default function Signup() {
 
             // Step 2: If signup successful and we have a user ID, update the profile in public.users table
             if (authData.user) {
+                // Wait a moment to ensure the trigger has time to create the profile
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
                 // Update the user's profile in the public.users table
                 const { error: profileError } = await supabase
                     .from('users')
-                    .upsert({
-                        id: authData.user.id,
+                    .update({  
                         first_name: formData.firstName,
                         last_name: formData.lastName,
-                        company: formData.company,
-                        email: formData.email
+                        company: formData.company
                     })
+                    .eq('id', authData.user.id)  
 
                 if (profileError) {
-                    console.error("Error updating user profile:", profileError)
-                    // We don't set an error here because the auth signup was successful
-                    // The profile data will be created by our database trigger as a fallback
+                    console.error("Error updating user profile:", profileError);
+                    
+                    // Try an insert as fallback if update fails
+                    const { error: insertError } = await supabase
+                        .from('users')
+                        .insert({
+                            id: authData.user.id,
+                            first_name: formData.firstName,
+                            last_name: formData.lastName,
+                            company: formData.company,
+                            email: formData.email
+                        });
+                        
+                    if (insertError) {
+                        console.error("Fallback insert also failed:", insertError);
+                    }
                 }
             }
 
