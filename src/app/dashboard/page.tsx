@@ -1,90 +1,327 @@
-import { createClient } from '@/utils/supabase/server'
-import { redirect } from 'next/navigation'
-import Link from 'next/link'
+import {
+  AlertTriangle,
+  Calendar,
+  ChevronDown,
+  Clock,
+  Filter,
+  Globe,
+  MapPin,
+  Search,
+  Shield,
+  TrendingUp,
+  Users,
+} from "lucide-react"
 
-export default async function Dashboard() {
-  const supabase = await createClient()
-  
-  // Get session data on the server
-  const { data: { user } } = await supabase.auth.getUser()
-  
-  // If no user is logged in, redirect to login page
-  if (!user) {
-    redirect('/auth/login')
-  }
-  
-  // Fetch the user's profile data from the users table
-  const { data: profile } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', user.id)
-    .single()
-  
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DashboardHeader } from "../components/dashboard/dashboard-header"
+import { DashboardShell } from "../components/dashboard/dashboard-shell"
+import { RiskScoreCard } from "../components/dashboard/risk-score-card"
+import { SupplyChainMap } from "../components/dashboard/supply-chain-map"
+import { RecentDisruptions } from "../components/dashboard/recent-disruption"
+import { SupplierRiskTable } from "../components/dashboard/supplier-risk-table"
+import { RiskTrendChart } from "../components/dashboard/risk-trend-chart"
+import { NewsAlerts } from "../components/dashboard/news-alert"
+
+export default function DashboardPage() {
   return (
-    <div className="flex min-h-screen flex-col p-8">
-      <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        
-        <form action={async () => {
-          'use server'
-          const supabase = await createClient()
-          await supabase.auth.signOut()
-          redirect('/')
-        }}>
-          <button 
-            type="submit"
-            className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-          >
-            Sign Out
-          </button>
-        </form>
-      </div>
-      
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-md">
-        <h2 className="mb-4 text-xl font-semibold">User Profile</h2>
-        
-        <div className="space-y-4">
-          <div>
-            <p className="text-sm font-medium text-gray-500">Email</p>
-            <p className="text-lg">{user.email}</p>
-          </div>
-          
-          {profile && (
-            <>
-              <div>
-                <p className="text-sm font-medium text-gray-500">Name</p>
-                <p className="text-lg">{profile.first_name} {profile.last_name}</p>
-              </div>
-              
-              <div>
-                <p className="text-sm font-medium text-gray-500">Company</p>
-                <p className="text-lg">{profile.company || 'Not specified'}</p>
-              </div>
-            </>
-          )}
-          
-          <div>
-            <p className="text-sm font-medium text-gray-500">User ID</p>
-            <p className="text-lg font-mono">{user.id}</p>
-          </div>
-          
-          <div>
-            <p className="text-sm font-medium text-gray-500">Last Sign In</p>
-            <p className="text-lg">
-              {new Date(user.last_sign_in_at || '').toLocaleString() || 'N/A'}
-            </p>
-          </div>
+    <DashboardShell>
+      <DashboardHeader heading="Dashboard" text="Monitor your supply chain risks and disruptions in real-time.">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm">
+            <Calendar className="mr-2 h-4 w-4" />
+            Last 30 Days
+            <ChevronDown className="ml-2 h-4 w-4" />
+          </Button>
+          <Button className="bg-teal-600 hover:bg-teal-700" size="sm">
+            <Filter className="mr-2 h-4 w-4" />
+            Filter
+          </Button>
         </div>
+      </DashboardHeader>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <RiskScoreCard
+          title="Global Risk Score"
+          value="68"
+          change="+12"
+          trend="up"
+          description="High risk level"
+          icon={<AlertTriangle className="h-4 w-4" />}
+        />
+        <RiskScoreCard
+          title="Active Disruptions"
+          value="24"
+          change="+5"
+          trend="up"
+          description="Across 14 countries"
+          icon={<Globe className="h-4 w-4" />}
+        />
+        <RiskScoreCard
+          title="At-Risk Suppliers"
+          value="37"
+          change="-3"
+          trend="down"
+          description="8% of your suppliers"
+          icon={<Users className="h-4 w-4" />}
+        />
+        <RiskScoreCard
+          title="Tariff Impact"
+          value="$1.2M"
+          change="+$320K"
+          trend="up"
+          description="Estimated monthly impact"
+          icon={<TrendingUp className="h-4 w-4" />}
+        />
       </div>
-      
-      <div className="mt-6">
-        <Link 
-          href="/"
-          className="text-blue-600 hover:text-blue-800 hover:underline"
-        >
-          &larr; Back to Home
-        </Link>
-      </div>
-    </div>
+      <Tabs defaultValue="overview" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="suppliers">Suppliers</TabsTrigger>
+          <TabsTrigger value="disruptions">Disruptions</TabsTrigger>
+          <TabsTrigger value="news">News & Alerts</TabsTrigger>
+        </TabsList>
+        <TabsContent value="overview" className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+            <Card className="lg:col-span-4">
+              <CardHeader>
+                <CardTitle>Global Supply Chain Disruptions</CardTitle>
+                <CardDescription>Real-time view of active disruptions affecting your supply chain</CardDescription>
+              </CardHeader>
+              <CardContent className="pl-2">
+                <SupplyChainMap />
+              </CardContent>
+            </Card>
+            <Card className="lg:col-span-3">
+              <CardHeader>
+                <CardTitle>Risk Trend Analysis</CardTitle>
+                <CardDescription>30-day risk score trend by category</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <RiskTrendChart />
+              </CardContent>
+            </Card>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+            <Card className="lg:col-span-4">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <div className="space-y-1">
+                  <CardTitle>Recent Disruptions</CardTitle>
+                  <CardDescription>Latest supply chain events affecting your operations</CardDescription>
+                </div>
+                <Button variant="outline" size="sm">
+                  View All
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <RecentDisruptions />
+              </CardContent>
+            </Card>
+            <Card className="lg:col-span-3">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <div className="space-y-1">
+                  <CardTitle>AI-Generated Insights</CardTitle>
+                  <CardDescription>Gemini AI analysis of current supply chain trends</CardDescription>
+                </div>
+                <Badge className="bg-teal-600">Powered by Gemini AI</Badge>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="rounded-lg border p-3">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-amber-500" />
+                      <p className="text-sm font-medium">Tariff Impact Analysis</p>
+                    </div>
+                    <p className="mt-2 text-sm text-gray-500">
+                      Recent 25% tariff increases on electronics from Asia will impact 12 of your suppliers. Estimated
+                      cost increase: $320K monthly. Consider alternative sourcing from Vietnam or Mexico.
+                    </p>
+                  </div>
+                  <div className="rounded-lg border p-3">
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle className="h-4 w-4 text-red-500" />
+                      <p className="text-sm font-medium">Port Congestion Alert</p>
+                    </div>
+                    <p className="mt-2 text-sm text-gray-500">
+                      Severe congestion at Port of Rotterdam affecting 8 shipments. Recommend expediting critical
+                      components via air freight and increasing safety stock for affected parts.
+                    </p>
+                  </div>
+                  <div className="rounded-lg border p-3">
+                    <div className="flex items-center gap-2">
+                      <Shield className="h-4 w-4 text-green-500" />
+                      <p className="text-sm font-medium">Resilience Opportunity</p>
+                    </div>
+                    <p className="mt-2 text-sm text-gray-500">
+                      Analysis shows 30% of high-risk components have single-source suppliers. Diversifying top 5
+                      critical components could reduce disruption risk by 45%.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        <TabsContent value="suppliers" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Supplier Risk Assessment</CardTitle>
+                  <CardDescription>Risk analysis of your supplier network</CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+                    <Input type="search" placeholder="Search suppliers..." className="w-[200px] pl-8 md:w-[300px]" />
+                  </div>
+                  <Button variant="outline" size="sm">
+                    <Filter className="mr-2 h-4 w-4" />
+                    Filter
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <SupplierRiskTable />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="disruptions" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Active Disruptions</CardTitle>
+              <CardDescription>Current events affecting your supply chain</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="rounded-lg border p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-4">
+                      <div className="rounded-full bg-red-100 p-2">
+                        <AlertTriangle className="h-5 w-5 text-red-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">Port Strike - Rotterdam</h3>
+                        <p className="text-sm text-gray-500">
+                          Worker strike affecting container processing. Expected to last 5-7 days.
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          <Badge variant="outline" className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3" /> Rotterdam, Netherlands
+                          </Badge>
+                          <Badge variant="outline" className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" /> Started 2 days ago
+                          </Badge>
+                          <Badge variant="destructive">High Impact</Badge>
+                        </div>
+                      </div>
+                    </div>
+                    <Button size="sm">View Details</Button>
+                  </div>
+                </div>
+                <div className="rounded-lg border p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-4">
+                      <div className="rounded-full bg-amber-100 p-2">
+                        <AlertTriangle className="h-5 w-5 text-amber-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">Factory Shutdown - Shenzhen</h3>
+                        <p className="text-sm text-gray-500">
+                          Power outages affecting electronics manufacturing. 40% capacity reduction.
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          <Badge variant="outline" className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3" /> Shenzhen, China
+                          </Badge>
+                          <Badge variant="outline" className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" /> Started 4 days ago
+                          </Badge>
+                          <Badge variant="outline" className="bg-amber-100 text-amber-800">
+                            Medium Impact
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                    <Button size="sm">View Details</Button>
+                  </div>
+                </div>
+                <div className="rounded-lg border p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-4">
+                      <div className="rounded-full bg-amber-100 p-2">
+                        <TrendingUp className="h-5 w-5 text-amber-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">Tariff Increase - US/China</h3>
+                        <p className="text-sm text-gray-500">
+                          New 25% tariffs on electronics and components from China to US.
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          <Badge variant="outline" className="flex items-center gap-1">
+                            <Globe className="h-3 w-3" /> US/China Trade
+                          </Badge>
+                          <Badge variant="outline" className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" /> Effective in 14 days
+                          </Badge>
+                          <Badge variant="outline" className="bg-amber-100 text-amber-800">
+                            Medium Impact
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                    <Button size="sm">View Details</Button>
+                  </div>
+                </div>
+                <div className="rounded-lg border p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-4">
+                      <div className="rounded-full bg-red-100 p-2">
+                        <AlertTriangle className="h-5 w-5 text-red-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">Shipping Delays - Suez Canal</h3>
+                        <p className="text-sm text-gray-500">
+                          Security concerns causing rerouting of vessels. 10-14 day delays expected.
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          <Badge variant="outline" className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3" /> Suez Canal, Egypt
+                          </Badge>
+                          <Badge variant="outline" className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" /> Started 1 week ago
+                          </Badge>
+                          <Badge variant="destructive">High Impact</Badge>
+                        </div>
+                      </div>
+                    </div>
+                    <Button size="sm">View Details</Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="news" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>News & Alerts</CardTitle>
+                  <CardDescription>Latest news affecting global supply chains</CardDescription>
+                </div>
+                <Badge className="bg-teal-600">Powered by NewsAPI.ai</Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <NewsAlerts />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </DashboardShell>
   )
 }
