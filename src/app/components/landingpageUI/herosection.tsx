@@ -3,6 +3,7 @@ import { ArrowRight, BarChart, Globe, Shield, Zap, Play } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
 import Image from "next/image"
+import HeroPic from "../../../../public/heroPicture.jpg"
 
 export default function HeroSection() {
   return (
@@ -53,7 +54,7 @@ export default function HeroSection() {
                 className="inline-flex items-center rounded-full bg-teal-50 px-4 py-2 text-sm font-medium text-teal-700 ring-1 ring-inset ring-teal-600/20"
               >
                 <Zap className="h-4 w-4 mr-2 text-teal-600" />
-                Now powered by Gemini AI & NewsAPI.ai
+                Enhanced with cutting-edge intelligence and real-time data insights.
               </motion.div>
 
               {/* Headline */}
@@ -101,7 +102,7 @@ export default function HeroSection() {
             </motion.div>
 
             {/* Trust indicators */}
-            <motion.div
+            {/* <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
@@ -123,7 +124,7 @@ export default function HeroSection() {
                   <span>4.9/5 from 120 reviews</span>
                 </div>
               </div>
-            </motion.div>
+            </motion.div> */}
           </div>
 
           {/* Dashboard Preview */}
@@ -153,7 +154,7 @@ export default function HeroSection() {
                 <div className="p-4">
                   {/* Map section */}
                   <div className="bg-gray-50 rounded-lg p-4 mb-4 h-64 flex items-center justify-center">
-                    <Globe className="h-32 w-32 text-gray-300" />
+                    <Image src={HeroPic} alt="Hero" className="w-full h-full object-cover" />
                   </div>
                   
                   {/* Stats row */}
