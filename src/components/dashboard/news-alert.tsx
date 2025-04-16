@@ -24,7 +24,7 @@ interface NewsItem {
   isFallback?: boolean;
 }
 
-export function NewsAlerts() {
+export function NewsAlerts({ previewMode = false, maxItems = 10 }: { previewMode?: boolean; maxItems?: number } = {}) {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [aiSummaries, setAiSummaries] = useState<{[key: string]: string}>({});
   const [loading, setLoading] = useState(true);
@@ -224,10 +224,12 @@ export function NewsAlerts() {
   };
 
   // Filter news by category
-  const filteredNews = activeCategory === "all" 
-    ? news 
-    : news.filter(item => 
-        item.category.some(cat => cat.toLowerCase().includes(activeCategory.toLowerCase())));
+  const filteredNews = activeCategory === "all"
+    ? news
+    : news.filter(item => item.category.some(cat => cat.toLowerCase().includes(activeCategory.toLowerCase())));
+
+  // Limit items based on maxItems prop
+  const displayedNews = previewMode ? filteredNews.slice(0, maxItems) : filteredNews;
 
   const renderSentimentBadge = (sentiment: string) => {
     switch(sentiment) {
@@ -265,29 +267,17 @@ export function NewsAlerts() {
 
   return (
     <div className="space-y-4">
-      {dataSource !== 'newsdata' && dataSource !== 'loading' && (
-        <div className="rounded-lg bg-amber-50 border-amber-200 border p-3 mb-4 flex items-center gap-2">
-          <Info className="h-5 w-5 text-amber-500" />
-          <div>
-            <p className="text-sm font-medium text-amber-800">
-              Using demo data - NewsData.io API integration issue
-            </p>
-            <p className="text-xs text-amber-700">
-              Check your API key or server logs for more information.
-            </p>
-          </div>
-        </div>
+      {!previewMode && (
+        <Tabs defaultValue="all" className="w-full" onValueChange={setActiveCategory}>
+          <TabsList className="mb-4">
+            <TabsTrigger value="all">All News</TabsTrigger>
+            <TabsTrigger value="business">Business</TabsTrigger>
+            <TabsTrigger value="politics">Politics</TabsTrigger>
+            <TabsTrigger value="technology">Technology</TabsTrigger>
+            <TabsTrigger value="environment">Environment</TabsTrigger>
+          </TabsList>
+        </Tabs>
       )}
-      
-      <Tabs defaultValue="all" onValueChange={setActiveCategory}>
-        <TabsList className="bg-slate-50 dark:bg-slate-900">
-          <TabsTrigger value="all">All News</TabsTrigger>
-          <TabsTrigger value="logistics">Logistics</TabsTrigger>
-          <TabsTrigger value="manufacturing">Manufacturing</TabsTrigger>
-          <TabsTrigger value="trade">Trade & Tariffs</TabsTrigger>
-          <TabsTrigger value="technology">Technology</TabsTrigger>
-        </TabsList>
-      </Tabs>
 
       {loading ? (
         <div className="flex justify-center items-center py-12">
@@ -301,21 +291,21 @@ export function NewsAlerts() {
             <div className="text-red-800">{error}</div>
           </div>
         </div>
-      ) : filteredNews.length === 0 ? (
+      ) : displayedNews.length === 0 ? (
         <div className="rounded-lg border p-4 text-center">
           <p className="text-gray-500">No news found for this category.</p>
         </div>
       ) : (
-        filteredNews.map((item, index) => {
+        displayedNews.map((item, index) => {
           const sentiment = getSentimentBadge(item);
           const impact = getImpactLevel(item);
           
           return (
             <div key={index} className="rounded-lg border bg-white dark:bg-slate-950 shadow-sm">
-              <div className="p-4">
+              <div className={`p-${previewMode ? '3' : '4'}`}>
                 <div className="flex items-start gap-4">
                   <div className="flex-1">
-                    <h3 className="font-medium text-lg">{item.title}</h3>
+                    <h3 className={`font-medium ${previewMode ? 'text-base' : 'text-lg'}`}>{item.title}</h3>
                     <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-500">
                       <span className="font-medium">{item.source_id}</span>
                       <span>•</span>
@@ -327,21 +317,23 @@ export function NewsAlerts() {
                     <div className="mt-2 flex flex-wrap gap-2">
                       {renderSentimentBadge(sentiment)}
                       {renderImpactBadge(impact)}
-                      {item.isFallback && (
+                      {!previewMode && item.isFallback && (
                         <Badge variant="outline" className="bg-slate-100 text-slate-800 text-xs">
                           Demo Data
                         </Badge>
                       )}
-                      {item.category.slice(0, 2).map((cat, idx) => (
+                      {!previewMode && item.category.slice(0, 2).map((cat, idx) => (
                         <Badge key={idx} variant="outline">{cat}</Badge>
                       ))}
                     </div>
                     
-                    <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">
-                      {item.description}
-                    </p>
+                    {!previewMode && (
+                      <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">
+                        {item.description}
+                      </p>
+                    )}
                     
-                    {aiSummaries[item.title] && (
+                    {!previewMode && aiSummaries[item.title] && (
                       <Card className="mt-3 bg-teal-50 dark:bg-teal-950/50">
                         <CardContent className="p-3">
                           <div className="flex items-center gap-2 mb-1">
@@ -354,7 +346,7 @@ export function NewsAlerts() {
                     )}
                   </div>
                   
-                  {item.image_url && (
+                  {item.image_url && !previewMode && (
                     <div className="hidden md:block flex-shrink-0">
                       <img 
                         src={item.image_url} 
@@ -366,9 +358,9 @@ export function NewsAlerts() {
                 </div>
                 
                 <div className="mt-4 flex justify-end">
-                  <Button variant="outline" size="sm" asChild>
+                  <Button variant={previewMode ? "ghost" : "outline"} size="sm" asChild>
                     <a href={item.link} target="_blank" rel="noopener noreferrer" className="flex items-center">
-                      Read Full Article
+                      {previewMode ? 'Read More' : 'Read Full Article'}
                       <ExternalLink className="ml-1 h-3 w-3" />
                     </a>
                   </Button>

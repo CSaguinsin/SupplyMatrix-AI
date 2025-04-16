@@ -6,6 +6,7 @@ import {
   Calendar,
   ChevronDown,
   Clock,
+  ExternalLink,
   Filter,
   Globe,
   MapPin,
@@ -17,7 +18,7 @@ import {
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { DashboardHeader } from "../../components/dashboard/dashboard-header"
 import { DashboardShell } from "../../components/dashboard/dashboard-shell"
@@ -26,7 +27,8 @@ import { SupplyChainMap } from "../../components/dashboard/supply-chain-map"
 import { RecentDisruptions } from "../../components/dashboard/recent-disruption"
 import { SupplierRiskTable } from "../../components/dashboard/supplier-risk-table"
 import { RiskTrendChart } from "../../components/dashboard/risk-trend-chart"
-import { NewsAlerts } from "../../components/dashboard/news-alert"
+import { NewsAlerts } from "@/components/dashboard/news-alert"
+import Link from "next/link"
 
 // Inline implementation instead of external import to avoid path issues
 const GeminiInsights = () => {
@@ -63,6 +65,13 @@ const GeminiInsights = () => {
         </p>
       </div>
     </div>
+  );
+};
+
+// Create a condensed version of NewsAlerts for the dashboard preview
+const NewsPreview = () => {
+  return (
+    <NewsAlerts previewMode={true} maxItems={3} />
   );
 };
 
@@ -107,92 +116,113 @@ export default function DashboardPage() {
           value="37"
           change="-3"
           trend="down"
-          description="8% of your suppliers"
+          description="Improved from last month"
           icon={<Users className="h-4 w-4" />}
         />
         <RiskScoreCard
-          title="Tariff Impact"
-          value="$1.2M"
-          change="+$320K"
+          title="Avg. Delivery Delay"
+          value="6.4d"
+          change="+1.2d"
           trend="up"
-          description="Estimated monthly impact"
-          icon={<TrendingUp className="h-4 w-4" />}
+          description="Majority in Asia region"
+          icon={<Clock className="h-4 w-4" />}
         />
       </div>
 
-      {/* Controlled tabs with onClick handlers to ensure client-side navigation works */}
       <div className="space-y-4">
         <div className="flex border-b">
-          <button 
-            className={`px-4 py-2 font-medium ${activeTab === 'overview' ? 'border-b-2 border-teal-600 text-teal-600' : 'text-gray-500'}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              setActiveTab('overview');
-            }}
+          <button
+            onClick={() => setActiveTab("overview")}
+            className={`px-4 py-2 focus:outline-none ${
+              activeTab === "overview"
+                ? "border-b-2 border-teal-600 font-medium text-teal-600"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
           >
             Overview
           </button>
-          <button 
-            className={`px-4 py-2 font-medium ${activeTab === 'suppliers' ? 'border-b-2 border-teal-600 text-teal-600' : 'text-gray-500'}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              setActiveTab('suppliers');
-            }}
+          <button
+            onClick={() => setActiveTab("suppliers")}
+            className={`px-4 py-2 focus:outline-none ${
+              activeTab === "suppliers"
+                ? "border-b-2 border-teal-600 font-medium text-teal-600"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
           >
             Suppliers
           </button>
-          <button 
-            className={`px-4 py-2 font-medium ${activeTab === 'disruptions' ? 'border-b-2 border-teal-600 text-teal-600' : 'text-gray-500'}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              setActiveTab('disruptions');
-            }}
+          <button
+            onClick={() => setActiveTab("disruptions")}
+            className={`px-4 py-2 focus:outline-none ${
+              activeTab === "disruptions"
+                ? "border-b-2 border-teal-600 font-medium text-teal-600"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
           >
             Disruptions
           </button>
-          <button 
-            className={`px-4 py-2 font-medium ${activeTab === 'news' ? 'border-b-2 border-teal-600 text-teal-600' : 'text-gray-500'}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              setActiveTab('news');
-            }}
+          <button
+            onClick={() => setActiveTab("news")}
+            className={`px-4 py-2 focus:outline-none ${
+              activeTab === "news"
+                ? "border-b-2 border-teal-600 font-medium text-teal-600"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
           >
-            News & Alerts
+            News
           </button>
         </div>
 
-        {/* Tab content */}
-        <div className="mt-4">
+        <div className="grid gap-4">
           {activeTab === 'overview' && (
             <div className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                <Card className="lg:col-span-4">
-                  <CardHeader>
-                    <CardTitle>Global Supply Chain Disruptions</CardTitle>
-                    <CardDescription>Real-time view of active disruptions affecting your supply chain</CardDescription>
-                  </CardHeader>
-                  <CardContent className="pl-2">
+              {/* Map Section */}
+              {/* <Card>
+                <CardHeader>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <CardTitle>Global Supply Chain Map</CardTitle>
+                      <CardDescription>Real-time view of supplier locations and active disruptions</CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-red-500">8 High Risk</Badge>
+                      <Badge className="bg-amber-500">14 Medium Risk</Badge>
+                      <Badge className="bg-green-500">42 Low Risk</Badge>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="px-0 sm:px-2">
+                  <div className="aspect-[16/9] rounded-lg bg-gray-100 sm:aspect-[21/9]">
                     <SupplyChainMap />
-                  </CardContent>
-                </Card>
-                <Card className="lg:col-span-3">
-                  <CardHeader>
-                    <CardTitle>Risk Trend Analysis</CardTitle>
-                    <CardDescription>30-day risk score trend by category</CardDescription>
+                  </div>
+                </CardContent>
+              </Card> */}
+
+              {/* Dashboard Content Grid with Insights and News Preview
+              <div className="grid gap-4 md:grid-cols-5">
+                <Card className="md:col-span-3">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <div className="space-y-1">
+                      <CardTitle>Risk Trends</CardTitle>
+                      <CardDescription>30-day risk analysis by category</CardDescription>
+                    </div>
+                    <Button variant="ghost" size="sm">
+                      <Filter className="mr-2 h-4 w-4" />
+                      Filter
+                    </Button>
                   </CardHeader>
                   <CardContent>
                     <RiskTrendChart />
                   </CardContent>
                 </Card>
-              </div>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                <Card className="lg:col-span-4">
+                
+                <Card className="md:col-span-2">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <div className="space-y-1">
                       <CardTitle>Recent Disruptions</CardTitle>
-                      <CardDescription>Latest supply chain events affecting your operations</CardDescription>
+                      <CardDescription>Latest events affecting your suppliers</CardDescription>
                     </div>
-                    <Button variant="outline" size="sm">
+                    <Button variant="ghost" size="sm">
                       View All
                     </Button>
                   </CardHeader>
@@ -200,7 +230,12 @@ export default function DashboardPage() {
                     <RecentDisruptions />
                   </CardContent>
                 </Card>
-                <Card className="lg:col-span-3">
+              </div> */}
+
+              {/* New Section: AI Insights and News Preview */}
+              <div className="grid gap-4 md:grid-cols-2">
+                {/* AI-Generated Insights */}
+                <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <div className="space-y-1">
                       <CardTitle>AI-Generated Insights</CardTitle>
@@ -211,6 +246,36 @@ export default function DashboardPage() {
                   <CardContent>
                     <GeminiInsights />
                   </CardContent>
+                  <CardFooter className="flex justify-end pt-0">
+                    <Button variant="outline" size="sm">
+                      Request Custom Analysis
+                    </Button>
+                  </CardFooter>
+                </Card>
+
+                {/* News Preview */}
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <div className="space-y-1">
+                      <CardTitle>Latest News</CardTitle>
+                      <CardDescription>Supply chain news affecting your operations</CardDescription>
+                    </div>
+                    <Badge className="bg-teal-600">
+                      <Globe className="mr-1 h-3 w-3" />
+                      Powered by Craftora
+                    </Badge>
+                  </CardHeader>
+                  <CardContent>
+                    <NewsPreview />
+                  </CardContent>
+                  <CardFooter className="flex justify-end pt-0">
+                    <Link href="/newstab">
+                      <Button variant="outline" size="sm">
+                        <ExternalLink className="mr-2 h-4 w-4" />
+                        View All News
+                      </Button>
+                    </Link>
+                  </CardFooter>
                 </Card>
               </div>
             </div>
