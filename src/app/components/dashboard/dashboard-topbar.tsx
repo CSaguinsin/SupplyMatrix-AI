@@ -2,6 +2,8 @@ import { Bell, Globe, Menu, Search, User } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { LogoutButton } from "./logout-button"
+import { Separator } from "@/components/ui/separator"
 
 export function DashboardTopbar() {
   return (
@@ -32,6 +34,8 @@ export function DashboardTopbar() {
           <User className="h-4 w-4" />
           <span>John Doe</span>
         </Button>
+        <Separator orientation="vertical" className="hidden h-8 md:block" />
+        <LogoutButton />
       </div>
     </header>
   )

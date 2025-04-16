@@ -12,8 +12,11 @@ export function DashboardShell({ children }: DashboardShellProps) {
     <div className="flex min-h-screen flex-col">
       <DashboardTopbar />
       <div className="flex flex-1">
-        <DashboardNav />
-        <main className="flex-1 overflow-auto p-4 md:p-6">
+        {/* Add isolation layer to ensure nav events don't get masked */}
+        <div style={{ isolation: 'isolate', position: 'relative', zIndex: 100 }}>
+          <DashboardNav />
+        </div>
+        <main className="flex-1 overflow-auto p-4 md:p-6" style={{ position: 'relative', zIndex: 10 }}>
           <div className="mx-auto space-y-4">{children}</div>
         </main>
       </div>

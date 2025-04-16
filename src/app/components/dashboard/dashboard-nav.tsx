@@ -14,10 +14,10 @@ import {
 
 export function DashboardNav() {
   return (
-    <div className="hidden border-r bg-gray-50/40 md:block md:w-64">
+    <div className="hidden border-r bg-gray-50/40 md:block md:w-64" style={{ zIndex: 50 }}>
       <div className="flex h-full flex-col gap-2 p-4">
       <div className="flex items-center">
-              <Link href="/" className="flex items-center gap-2 group">
+              <Link href="/" className="flex items-center gap-2 group" style={{ pointerEvents: 'auto', position: 'relative', zIndex: 50 }}>
                 <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-teal-600 group-hover:bg-teal-700 transition-colors">
                   <Globe className="h-5 w-5 text-white" />
                 </div>
@@ -27,10 +27,11 @@ export function DashboardNav() {
               </Link>
             </div>
         <div className="flex-1 py-2">
-          <nav className="grid gap-1">
+          <nav className="grid gap-1" style={{ position: 'relative', zIndex: 50 }}>
             <Link
               href="/dashboard"
               className="flex items-center gap-3 rounded-lg bg-gray-100 px-3 py-2 text-gray-900 transition-all hover:text-gray-900"
+              style={{ pointerEvents: 'auto', position: 'relative', zIndex: 50 }}
             >
               <Home className="h-4 w-4" />
               <span className="text-sm font-medium">Dashboard</span>
@@ -38,6 +39,7 @@ export function DashboardNav() {
             <Link
               href="/dashboard/suppliers"
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900"
+              style={{ pointerEvents: 'auto', position: 'relative', zIndex: 50 }}
             >
               <Users className="h-4 w-4" />
               <span className="text-sm font-medium">Suppliers</span>
@@ -45,6 +47,7 @@ export function DashboardNav() {
             <Link
               href="/dashboard/disruptions"
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900"
+              style={{ pointerEvents: 'auto', position: 'relative', zIndex: 50 }}
             >
               <AlertTriangle className="h-4 w-4" />
               <span className="text-sm font-medium">Disruptions</span>
@@ -55,13 +58,15 @@ export function DashboardNav() {
             <Link
               href="/dashboard/shipments"
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900"
+              style={{ pointerEvents: 'auto', position: 'relative', zIndex: 50 }}
             >
               <Truck className="h-4 w-4" />
               <span className="text-sm font-medium">Shipments</span>
             </Link>
             <Link
-              href="/dashboard/news"
+              href="/newstab"
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900"
+              style={{ pointerEvents: 'auto', position: 'relative', zIndex: 50 }}
             >
               <Newspaper className="h-4 w-4" />
               <span className="text-sm font-medium">News & Alerts</span>
@@ -71,6 +76,7 @@ export function DashboardNav() {
             <Link
               href="/dashboard/risk-analysis"
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900"
+              style={{ pointerEvents: 'auto', position: 'relative', zIndex: 50 }}
             >
               <ShieldAlert className="h-4 w-4" />
               <span className="text-sm font-medium">Risk Analysis</span>
@@ -78,6 +84,7 @@ export function DashboardNav() {
             <Link
               href="/dashboard/trends"
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900"
+              style={{ pointerEvents: 'auto', position: 'relative', zIndex: 50 }}
             >
               <LineChart className="h-4 w-4" />
               <span className="text-sm font-medium">Trends</span>
@@ -85,6 +92,7 @@ export function DashboardNav() {
             <Link
               href="/dashboard/reports"
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900"
+              style={{ pointerEvents: 'auto', position: 'relative', zIndex: 50 }}
             >
               <BarChart3 className="h-4 w-4" />
               <span className="text-sm font-medium">Reports</span>
@@ -93,6 +101,7 @@ export function DashboardNav() {
             <Link
               href="/dashboard/settings"
               className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900"
+              style={{ pointerEvents: 'auto', position: 'relative', zIndex: 50 }}
             >
               <Settings className="h-4 w-4" />
               <span className="text-sm font-medium">Settings</span>

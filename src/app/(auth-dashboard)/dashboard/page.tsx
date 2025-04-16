@@ -125,25 +125,37 @@ export default function DashboardPage() {
         <div className="flex border-b">
           <button 
             className={`px-4 py-2 font-medium ${activeTab === 'overview' ? 'border-b-2 border-teal-600 text-teal-600' : 'text-gray-500'}`}
-            onClick={() => setActiveTab('overview')}
+            onClick={(e) => {
+              e.stopPropagation();
+              setActiveTab('overview');
+            }}
           >
             Overview
           </button>
           <button 
             className={`px-4 py-2 font-medium ${activeTab === 'suppliers' ? 'border-b-2 border-teal-600 text-teal-600' : 'text-gray-500'}`}
-            onClick={() => setActiveTab('suppliers')}
+            onClick={(e) => {
+              e.stopPropagation();
+              setActiveTab('suppliers');
+            }}
           >
             Suppliers
           </button>
           <button 
             className={`px-4 py-2 font-medium ${activeTab === 'disruptions' ? 'border-b-2 border-teal-600 text-teal-600' : 'text-gray-500'}`}
-            onClick={() => setActiveTab('disruptions')}
+            onClick={(e) => {
+              e.stopPropagation();
+              setActiveTab('disruptions');
+            }}
           >
             Disruptions
           </button>
           <button 
             className={`px-4 py-2 font-medium ${activeTab === 'news' ? 'border-b-2 border-teal-600 text-teal-600' : 'text-gray-500'}`}
-            onClick={() => setActiveTab('news')}
+            onClick={(e) => {
+              e.stopPropagation();
+              setActiveTab('news');
+            }}
           >
             News & Alerts
           </button>

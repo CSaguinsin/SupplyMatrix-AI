@@ -16,7 +16,7 @@ export default function NewsTabPage() {
             >
                 <Badge className="bg-teal-600 text-white">
                     <Globe className="mr-1 h-3 w-3" />
-                    Powered by NewsData.io
+                    Powered by Craftora
                 </Badge>
             </DashboardHeader>
             
